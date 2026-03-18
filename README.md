@@ -1,4 +1,4 @@
-# Soccer Field Booking & Tournament Management System
+# Football Field Booking & Tournament Management System
 
 ## Project Overview
 Hệ thống số hóa quy trình đặt sân bóng và quản lý giải đấu phong trào. Giải quyết các vấn đề về trùng lịch và quy trình thủ công.
