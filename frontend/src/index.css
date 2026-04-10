@@ -8,6 +8,19 @@
   --color-auth-accent-start: #1c6941;
   --color-auth-accent-end: #179955;
   --color-auth-placeholder: #cccccc;
+
+  --color-admin-shell: #29721d;
+  --color-admin-sidebar: #005e2e;
+  --color-admin-topbar: #005e2e;
+  --color-admin-surface: #29721d;
+  --color-admin-surface-soft: #005e2e;
+  --color-admin-border: #005e2e;
+  --color-admin-accent: #29721d;
+  --color-admin-icon-light: #ffffff;
+  --color-admin-text-primary: #ffffff;
+  --color-admin-text-secondary: rgb(255 255 255 / 0.78);
+  --color-admin-alert: #ffffff;
+
   --font-display: "Jersey 10", sans-serif;
   --font-body: "Inter", sans-serif;
 

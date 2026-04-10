@@ -1,440 +1,153 @@
-# Tài liệu giải thích code frontend
+# FRONTEND CODE EXPLANATION (CẬP NHẬT)
 
-## Mục tiêu tài liệu
+## 1. Tổng quan
 
-Tài liệu này mô tả từng file code và file cấu hình trong thư mục frontend:
+Frontend hiện tại được tổ chức thành 2 luồng chính:
 
-- File dùng để làm gì.
-- File hoạt động ra sao trong luồng chạy ứng dụng.
+- Luồng User (public): Landing + đăng nhập/đăng ký.
+- Luồng Admin (private dashboard): quản trị đa khu sân theo mô hình Multi-Facility.
 
-Lưu ý:
+Stack chính:
 
-- Thư mục node_modules và dist không phải mã nguồn tự viết.
-- Các file ảnh/icon là tài nguyên tĩnh, không chứa logic TypeScript/React.
+- React + TypeScript
+- React Router
+- Tailwind CSS v4
 
 ---
 
-## 1. Nhóm file cấu hình ở root frontend
+## 2. Kiến trúc Routing
 
-### .gitignore
+File trung tâm: `src/App.tsx`.
 
-Mục đích:
+### 2.1 Luồng User
 
-- Loại trừ log, thư mục build, thư viện cài đặt và file tạm khỏi Git.
+- `/` -> `LandingPage`
+- `/login` -> `LoginPage`
+- `/register` -> `RegisterPage`
 
-Cách hoạt động:
+Mục tiêu:
 
-- Git đọc file này để không track các đường dẫn như node_modules, dist, \*.log.
+- Người dùng vào trang chủ trước, sau đó điều hướng sang đăng nhập/đăng ký.
 
-### package.json
+### 2.2 Luồng Admin (Nested Routing)
 
-Mục đích:
+- `/admin` -> `AdminLayout`
+  - index -> `AdminDashboardPage`
+  - `/admin/bookings` -> `AdminFeatureLandingPage`
+  - `/admin/schedule` -> `FieldSchedulePage`
+  - `/admin/settings` -> `SettingsPage`
+  - `/admin/calendar` -> redirect về `/admin/schedule`
 
-- Khai báo metadata project, scripts và dependency.
+Ý nghĩa kiến trúc:
 
-Cách hoạt động:
-
-- npm đọc file này để cài package và chạy lệnh:
-  - dev: chạy Vite local.
-  - build: compile TypeScript rồi build Vite.
-  - lint: chạy ESLint.
-  - preview: chạy server preview bản build.
-
-### package-lock.json
-
-Mục đích:
-
-- Khóa chính xác version dependency đã cài.
-
-Cách hoạt động:
-
-- npm dùng lock file để tái tạo môi trường cài đặt nhất quán giữa các máy.
-
-### index.html
-
-Mục đích:
-
-- HTML shell gốc cho ứng dụng SPA.
-
-Cách hoạt động:
-
-- Trình duyệt load file này, mount app vào div id root.
-- Script module /src/main.tsx khởi chạy React app.
-
-### vite.config.ts
-
-Mục đích:
-
-- Cấu hình Vite.
-
-Cách hoạt động:
-
-- defineConfig bật plugin React.
-- Vite dùng file này khi chạy dev/build.
-
-### postcss.config.js
-
-Mục đích:
-
-- Cấu hình pipeline PostCSS cho CSS.
-
-Cách hoạt động:
-
-- Dùng @tailwindcss/postcss để xử lý Tailwind v4.
-- Dùng autoprefixer để thêm vendor prefix CSS.
-
-### tailwind.config.js
-
-Mục đích:
-
-- Cấu hình theme/content cho Tailwind.
-
-Cách hoạt động:
-
-- Tailwind quét class trong index.html và src.
-- File này hiện khai báo thêm color/font theo kiểu truyền thống.
-- Với Tailwind v4, bạn đang dùng thêm token tại src/index.css qua @theme.
-
-### eslint.config.js
-
-Mục đích:
-
-- Cấu hình lint cho TypeScript + React.
-
-Cách hoạt động:
-
-- Áp rule recommended của ESLint, typescript-eslint, react-hooks và react-refresh.
-- Bỏ qua thư mục dist.
-
-### tsconfig.json
-
-Mục đích:
-
-- File tsconfig gốc dạng project reference.
-
-Cách hoạt động:
-
-- Trỏ tới tsconfig.app.json và tsconfig.node.json để chia cấu hình theo ngữ cảnh.
-
-### tsconfig.app.json
-
-Mục đích:
-
-- Cấu hình TypeScript cho mã ứng dụng React trong src.
-
-Cách hoạt động:
-
-- Dùng moduleResolution bundler, jsx react-jsx, noEmit.
-- Bật các rule kiểm tra như noUnusedLocals/noUnusedParameters.
-
-### tsconfig.node.json
-
-Mục đích:
-
-- Cấu hình TypeScript cho file chạy phía tooling Node (vite.config.ts).
-
-Cách hoạt động:
-
-- Dùng type node, noEmit, moduleResolution bundler.
-
-### README.md
-
-Mục đích:
-
-- Tài liệu mặc định từ template Vite React TS.
-
-Cách hoạt động:
-
-- Chủ yếu mô tả setup chung, chưa phản ánh đầy đủ kiến trúc hiện tại của dự án.
+- `AdminLayout` là shell dùng chung (Sidebar + Topbar + Outlet).
+- Mọi trang admin con kế thừa layout và state toàn cục của admin.
 
 ---
 
-## 2. Nhóm file public
+## 3. Quản lý State Toàn cục (FacilityContext)
 
-### public/favicon.svg
+File: `src/contexts/FacilityContext.tsx`.
 
-Mục đích:
+`FacilityContext` cung cấp:
 
-- Icon tab trình duyệt.
+- `selectedFacilityId`
+- `selectedFacility`
+- `setSelectedFacilityId`
+- danh sách `facilities`
 
-Cách hoạt động:
+Provider được bọc trong `AdminLayout`, nên toàn bộ trang `/admin/*` dùng chung trạng thái chọn khu sân.
 
-- Được tham chiếu trong index.html qua link rel icon.
+### Luồng hoạt động
 
-### public/icons.svg
-
-Mục đích:
-
-- File icon tĩnh bổ sung (nếu cần dùng lại trong UI).
-
-Cách hoạt động:
-
-- Có thể tham chiếu trực tiếp qua đường dẫn public khi render.
+1. Người dùng chọn khu sân ở dropdown trong `Topbar`.
+2. `selectedFacilityId` đổi trong context.
+3. Các trang admin đang subscribe context tự render lại dữ liệu theo khu sân mới.
 
 ---
 
-## 3. Nhóm khởi động ứng dụng trong src
+## 4. Dữ liệu giả lập (Mock Data Layer)
 
-### src/main.tsx
+File: `src/data/mockAdminData.ts`.
 
-Mục đích:
+Các thực thể chính:
 
-- Entry point React.
+- `Facility`: thông tin khu sân.
+- `Field`: sân thuộc khu sân nào (`facilityId`).
+- `Booking`: đơn đặt/đang đá/bảo trì theo `fieldId`, `facilityId`, `startTime`.
+- `Order`: dữ liệu doanh thu theo khu sân.
+- `ADMIN_TIME_SLOTS` + `TIME_SLOT_PRICING`: khung giờ và giá động.
 
-Cách hoạt động:
+Lợi ích:
 
-- Import CSS global.
-- Bọc App bằng BrowserRouter.
-- Render vào root bằng createRoot.
-
-### src/App.tsx
-
-Mục đích:
-
-- Khai báo routing chính của app.
-
-Cách hoạt động:
-
-- Dùng Routes/Route từ react-router-dom.
-- Toàn bộ route dùng DashboardLayout làm khung.
-- Route index là OverviewPage.
-- Các route còn lại dùng PlaceholderPage.
-- Route wildcard chuyển về /.
-
-### src/index.css
-
-Mục đích:
-
-- CSS global + design token + animation dùng chung.
-
-Cách hoạt động:
-
-- Import Google Fonts.
-- Import Tailwind bằng @import "tailwindcss".
-- Khai báo token màu/font/radius/shadow qua @theme.
-- Định nghĩa utility class custom:
-  - page-enter
-  - dashboard-card
-  - panel-hover
-  - pixelated-icon
-- Đặt background tổng thể và keyframe fade-slide-in.
+- Tách dữ liệu khỏi UI.
+- Dễ chuyển sang API thật sau này.
 
 ---
 
-## 4. Nhóm assets và kiểu dữ liệu
+## 5. Kiến trúc UI lõi
 
-### src/assets/index.ts
+### 5.1 Dashboard (`AdminDashboardPage`)
 
-Mục đích:
+Trang này lọc dữ liệu theo `selectedFacilityId`:
 
-- Tập trung export tất cả icon/ảnh của dashboard.
+- Doanh thu lấy từ `mockOrders`.
+- Đơn đặt và tỷ lệ trống sân lấy từ `mockBookings` + `fields` + `ADMIN_TIME_SLOTS`.
+- Khi chọn “Tất cả khu sân” -> số liệu cộng dồn.
+- Khi chọn 1 khu sân cụ thể -> chỉ số của khu đó.
 
-Cách hoạt động:
+### 5.2 Lịch Sân (`FieldSchedulePage`) - Time-Block Grid
 
-- Import asset từ assets/icons và assets/images.
-- Gói vào object assets để các component dùng nhất quán.
+Đây là core UI của hệ thống vận hành:
 
-### src/types/dashboard.ts
+- Trục X: `ADMIN_TIME_SLOTS` (11 khung giờ).
+- Trục Y: danh sách `fields` sau khi lọc theo khu sân đã chọn.
+- Header hiển thị giá theo `TIME_SLOT_PRICING`.
+- Ô lịch render theo trạng thái:
+  - `available`
+  - `booked`
+  - `in-progress`
+  - `maintenance`
+- Click ô `booked`/`in-progress` hiển thị thông tin chi tiết.
 
-Mục đích:
+Kỹ thuật UI:
 
-- Định nghĩa type/interface dùng cho dashboard.
+- Bảng có `overflow-x-auto overflow-y-auto`.
+- Cột đầu sticky (`left-0`) để giữ tên sân khi cuộn ngang.
+- Header sticky theo trục dọc để luôn thấy khung giờ.
 
-Cách hoạt động:
+### 5.3 Settings (`SettingsPage`)
 
-- DashboardPath: union type của route hợp lệ.
-- NavItem, ActivityPoint, HighlightContact, ExpenseSlice: chuẩn hóa dữ liệu hiển thị.
+Trang cài đặt theo tab, tab mặc định là “Thông tin cơ sở”:
 
-### src/data/overviewData.ts
+- Form nhập tên khu, địa chỉ, hotline.
+- Chọn giờ mở/đóng.
+- Nút lưu có loading state.
 
-Mục đích:
+Các tab khác giữ placeholder để mở rộng dần:
 
-- Chứa dữ liệu giả lập cho sidebar, biểu đồ, card và title route.
-
-Cách hoạt động:
-
-- dashboardTitles map pathname -> title topbar.
-- navItems cung cấp data cho sidebar.
-- contacts cho khối Kèo nổi bật.
-- weeklyActivity + yAxisTicks cho biểu đồ cột.
-- expenseSlices cho biểu đồ doanh thu dạng donut/conic.
+- Quản lý sân bóng
+- Cấu hình thanh toán
+- Quản lý nhân viên
 
 ---
 
-## 5. Nhóm components theo Atomic Design
+## 6. Tái sử dụng Component
 
-## 5.1 Atoms
+`src/components/ui`:
 
-### src/components/atoms/Avatar.tsx
+- `TextInput` dùng lại cho auth + settings.
+- `Button` dùng cho các CTA/form submit.
+- `SocialIconButton` dùng cho auth.
 
-Mục đích:
+`src/components/admin`:
 
-- Hiển thị avatar hình tròn cho người dùng.
-
-Cách hoạt động:
-
-- Nhận src và alt.
-- Dùng class group-hover để scale nhẹ khi hover card cha.
-
-### src/components/atoms/IconButton.tsx
-
-Mục đích:
-
-- Nút icon tròn dùng cho topbar.
-
-Cách hoạt động:
-
-- Nhận iconSrc và alt.
-- Render button có trạng thái hover nhẹ.
-
-### src/components/atoms/NavLinkItem.tsx
-
-Mục đích:
-
-- Item điều hướng sidebar.
-
-Cách hoạt động:
-
-- Dùng NavLink để tự nhận trạng thái active từ route.
-- Active: đổi màu text + nền.
-- Nếu item.pixelated = true thì bật class pixelated-icon cho icon.
-
-### src/components/atoms/SectionTitle.tsx
-
-Mục đích:
-
-- Tiêu đề section tái sử dụng.
-
-Cách hoạt động:
-
-- Nhận text và render h3 với style heading chuẩn.
-
-## 5.2 Molecules
-
-### src/components/molecules/MetricCard.tsx
-
-Mục đích:
-
-- Card thông tin tài chính Tổng quan.
-
-Cách hoạt động:
-
-- Nhận title/amount/holder/validThru/cardNumber.
-- Render card gồm phần đầu và phần số thẻ tách bằng border-top.
-
-### src/components/molecules/HighlightCard.tsx
-
-Mục đích:
-
-- Khối Kèo nổi bật gồm danh sách người và ô nhập số tiền + nút Send.
-
-Cách hoạt động:
-
-- Lặp contacts để render avatar + tên + vai trò.
-- Nút next icon độc lập.
-- Input giữ giá trị mặc định 525.50.
-- Nút Send dùng shadow/token và transition hover.
-
-### src/components/molecules/WeeklyBarChart.tsx
-
-Mục đích:
-
-- Biểu đồ cột so sánh deposit/withdraw theo ngày.
-
-Cách hoạt động:
-
-- Tính maxValue từ data.
-- Hàm resolveBarHeight quy đổi giá trị thành chiều cao cột theo chartHeight.
-- Render trục Y, grid line và 2 cột mỗi ngày.
-
-### src/components/molecules/RevenueDonut.tsx
-
-Mục đích:
-
-- Biểu đồ donut doanh thu bằng CSS gradient.
-
-Cách hoạt động:
-
-- createGradient tạo chuỗi conic-gradient từ danh sách slices.
-- Render text label tuyệt đối theo positionClass từng slice.
-
-## 5.3 Organisms
-
-### src/components/organisms/Sidebar.tsx
-
-Mục đích:
-
-- Sidebar đầy đủ gồm logo, avatar khung tròn decor và menu.
-
-Cách hoạt động:
-
-- Render title MIXIFOOT.
-- Map navItems thành danh sách NavLinkItem.
-- Responsive: desktop là cột dọc, mobile cho phép cuộn ngang menu.
-
-### src/components/organisms/Topbar.tsx
-
-Mục đích:
-
-- Thanh topbar gồm tiêu đề trang và 2 icon action.
-
-Cách hoạt động:
-
-- Nhận title từ layout.
-- Dùng IconButton cho Notifications và Profile.
-
-## 5.4 Layouts
-
-### src/components/layouts/DashboardLayout.tsx
-
-Mục đích:
-
-- Khung giao diện chung cho toàn bộ dashboard route.
-
-Cách hoạt động:
-
-- Lấy pathname từ useLocation.
-- Tra title tương ứng từ dashboardTitles.
-- Render Sidebar + Topbar + Outlet (nội dung trang con).
+- `Sidebar`, `Topbar`, `StatCard` là lõi tái sử dụng của dashboard admin.
 
 ---
 
-## 6. Nhóm pages
+## 7. Ghi chú Tech Debt hiện tại
 
-### src/pages/OverviewPage.tsx
-
-Mục đích:
-
-- Trang dashboard chính theo thiết kế Figma.
-
-Cách hoạt động:
-
-- Ghép các section bằng component tái sử dụng:
-  - SectionTitle
-  - MetricCard
-  - HighlightCard
-  - WeeklyBarChart
-  - RevenueDonut
-- Data lấy từ overviewData.ts.
-
-### src/pages/PlaceholderPage.tsx
-
-Mục đích:
-
-- Trang tạm cho route chưa triển khai chi tiết.
-
-Cách hoạt động:
-
-- Nhận title và hiển thị thông điệp sẵn sàng mở rộng.
-- Dùng style card nhất quán với hệ dashboard.
-
----
-
-## 7. Tóm tắt luồng chạy tổng thể
-
-1. index.html nạp main.tsx.
-2. main.tsx khởi tạo React + BrowserRouter.
-3. App.tsx định nghĩa route, tất cả vào DashboardLayout.
-4. DashboardLayout dựng khung sidebar/topbar và render page con qua Outlet.
-5. OverviewPage ghép dữ liệu và component để tạo dashboard hoàn chỉnh.
-6. Styling lấy từ Tailwind v4 + token trong index.css.
+- Có một số route admin (`users`) vẫn đang dùng tạm `AdminDashboardPage` (placeholder logic).
+- Một số trang vẫn dùng mock data, chưa kết nối API backend.
+- Một số assets cũ có thể không còn dùng (cần xác nhận trước khi xóa).

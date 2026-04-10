@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "../../components/ui/Button";
 import { SocialIconButton } from "../../components/ui/SocialIconButton";
@@ -35,13 +36,14 @@ interface LoginFormProps {
 const EMAIL_OR_PHONE_REGEX = /^(?:\+?\d[\d\s-]{7,}|[^\s@]+@[^\s@]+\.[^\s@]+)$/;
 
 export function LoginForm({ onSubmit }: LoginFormProps) {
+  const navigate = useNavigate();
   const [values, setValues] = useState<LoginFormValues>({
     identifier: "",
     password: "",
   });
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const identifierPlaceholder = useMemo(() => "Email hoặc số điện thoại", []);
 
@@ -63,7 +65,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
     return nextErrors;
   };
 
-  const submitWithRole = async (role: LoginRole) => {
+  const submitWithRole = async (role: LoginRole, redirectPath: string) => {
     const nextErrors = validate();
     setErrors(nextErrors);
 
@@ -71,7 +73,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
       return;
     }
 
-    setIsSubmitting(true);
+    setIsLoading(true);
     try {
       if (onSubmit) {
         await onSubmit({
@@ -84,20 +86,27 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
           setTimeout(() => resolve(), 900);
         });
       }
+
+      navigate(redirectPath);
     } catch {
       setErrors({ global: "Đăng nhập thất bại. Vui lòng thử lại." });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleOwnerSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleAdminLogin = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    await submitWithRole("owner");
+    void submitWithRole("owner", "/admin");
+  };
+
+  const handleUserLogin = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    void submitWithRole("user", "/");
   };
 
   return (
-    <form onSubmit={handleOwnerSubmit} className="w-full">
+    <form className="w-full">
       <div className="mx-auto flex w-full max-w-[399px] flex-col gap-[22px]">
         <TextInput
           id="identifier"
@@ -147,21 +156,21 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
           }
         />
 
-        <div className="mt-1 space-y-4">
-          <Button type="submit" loading={isSubmitting}>
-            Đăng nhập chủ sân
+        <div className="mt-2 flex flex-col gap-3">
+          <Button type="button" onClick={handleAdminLogin} loading={isLoading}>
+            Đăng nhập Chủ sân
           </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            loading={isSubmitting}
-            onClick={() => {
-              void submitWithRole("user");
-            }}
-          >
-            Đăng nhập user
-          </Button>
+          <div className="opacity-95">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleUserLogin}
+              loading={isLoading}
+            >
+              Đăng nhập Khách hàng
+            </Button>
+          </div>
         </div>
 
         {errors.global ? (

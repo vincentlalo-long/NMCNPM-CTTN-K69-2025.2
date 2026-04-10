@@ -102,15 +102,6 @@ export function RegisterForm() {
         setTimeout(() => resolve(), 1500);
       });
 
-      const normalizedFullName = values.fullName.trim();
-      const normalizedEmailOrPhone = values.emailOrPhone.trim();
-
-      console.log("Register Success:", {
-        fullName: normalizedFullName,
-        emailOrPhone: normalizedEmailOrPhone,
-        password: values.password,
-      });
-
       setValues({
         fullName: "",
         emailOrPhone: "",
