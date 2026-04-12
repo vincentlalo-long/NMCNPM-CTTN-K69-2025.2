@@ -1,9 +1,7 @@
 package com.kstn.group4.backend.entity.enums;
 
 public enum RoleType {
-    SUPER_ADMIN("Super Admin - Full Control"),
-    LEAGUE_ADMIN("League Admin - Manage Leagues"),
-    TEAM_ADMIN("Team Admin - Manage Team Bookings"),
+    ADMIN("Admin - Full Control"),
     PLAYER("Player - Booking Person");
 
     private final String description;
