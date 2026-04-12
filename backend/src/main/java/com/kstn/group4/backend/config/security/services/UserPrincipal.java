@@ -1,20 +1,21 @@
 package com.kstn.group4.backend.config.security.services;
 
 import com.kstn.group4.backend.entity.User;
+import com.kstn.group4.backend.entity.enums.RoleType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-
+import java.util.List;
 
 public class UserPrincipal implements UserDetails {
     private Integer id;
     private String username;
     private String email;
-    private String role;
+    private RoleType role;
 
     @JsonIgnore
     private String password;
@@ -22,7 +23,7 @@ public class UserPrincipal implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(Integer id, String username, String email, String password,
-                           String role, Collection<? extends GrantedAuthority> authorities) {
+                         RoleType role, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -32,9 +33,17 @@ public class UserPrincipal implements UserDetails {
     }
 
     public static UserPrincipal build(User user) {
-        List<GrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase())
-        );
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        // Add main role
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+
+        // Add permissions based on role
+        if (user.getRole() == RoleType.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("PERMISSION_MANAGE_ALL"));
+        } else if (user.getRole() == RoleType.PLAYER) {
+            authorities.add(new SimpleGrantedAuthority("PERMISSION_BOOK_COURTS"));
+        }
 
         return new UserPrincipal(
                 user.getId(),
@@ -52,7 +61,7 @@ public class UserPrincipal implements UserDetails {
 
     public String getEmail() { return email; }
 
-    public String getRole() { return role; }
+    public RoleType getRole() { return role; }
 
     @Override
     public String getPassword() { return password; }
