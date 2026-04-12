@@ -1,9 +1,10 @@
 import {
   CalendarDays,
+  Handshake,
   House,
   Settings,
+  Shield,
   SquareChartGantt,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -21,9 +22,10 @@ interface SidebarProps {
 
 const sidebarItems: SidebarItem[] = [
   { label: "Tổng quan", to: "/admin", icon: House },
-  { label: "Người dùng", to: "/admin/users", icon: Users },
-  { label: "Đơn đặt sân", to: "/admin/bookings", icon: SquareChartGantt },
+  { label: "Đội bóng", to: "/admin/teams", icon: Shield },
+  { label: "Đơn đặt sân", to: "/admin/orders", icon: SquareChartGantt },
   { label: "Lịch sân", to: "/admin/schedule", icon: CalendarDays },
+  { label: "Cáp kèo", to: "/admin/matchmaking", icon: Handshake },
   { label: "Cài đặt", to: "/admin/settings", icon: Settings },
 ];
 
