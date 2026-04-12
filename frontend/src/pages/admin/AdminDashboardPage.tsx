@@ -41,7 +41,7 @@ export function AdminDashboardPage() {
     : mockOrders.filter((order) => order.facilityId === selectedFacilityId);
 
   const totalRevenue = filteredOrders.reduce(
-    (sum, order) => sum + order.totalAmount,
+    (sum, order) => sum + order.totalPrice,
     0,
   );
   const totalBookings = filteredBookings.filter(

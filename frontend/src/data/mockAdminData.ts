@@ -33,9 +33,11 @@ export interface Order {
   facilityId: string;
   fieldId: string;
   customerName: string;
-  totalAmount: number;
+  shift: string;
+  totalPrice: number;
   depositAmount: number;
-  createdAt: string;
+  status: "Chờ cọc" | "Đã cọc" | "Đã hủy";
+  matchDate: string;
 }
 
 export const ADMIN_TIME_SLOTS = [
@@ -227,53 +229,65 @@ export const mockOrders: Order[] = [
     facilityId: "den-lu-3",
     fieldId: "f-001",
     customerName: "Khải Nguyễn",
-    totalAmount: 1_800_000,
-    depositAmount: 600_000,
-    createdAt: "2026-04-10T08:15:00",
+    shift: "Ca 1 (17:30 - 19:00, 18/04/2026)",
+    totalPrice: 1_800_000,
+    depositAmount: 900_000,
+    status: "Chờ cọc",
+    matchDate: "2026-04-18T17:30:00",
   },
   {
     id: "ord-002",
     facilityId: "den-lu-3",
     fieldId: "f-002",
     customerName: "Linh Trần",
-    totalAmount: 1_350_000,
-    depositAmount: 450_000,
-    createdAt: "2026-04-10T09:20:00",
+    shift: "Ca 2 (19:00 - 20:30, 19/04/2026)",
+    totalPrice: 1_350_000,
+    depositAmount: 675_000,
+    status: "Đã cọc",
+    matchDate: "2026-04-19T19:00:00",
   },
   {
     id: "ord-003",
     facilityId: "dam-hong",
     fieldId: "f-004",
     customerName: "Hải Đăng",
-    totalAmount: 900_000,
-    depositAmount: 300_000,
-    createdAt: "2026-04-10T10:35:00",
+    shift: "Ca 1 (16:30 - 18:00, 12/04/2026)",
+    totalPrice: 900_000,
+    depositAmount: 450_000,
+    status: "Chờ cọc",
+    matchDate: "2026-04-12T16:30:00",
   },
   {
     id: "ord-004",
     facilityId: "dam-hong",
     fieldId: "f-005",
     customerName: "Quang Hoàng",
-    totalAmount: 1_800_000,
-    depositAmount: 600_000,
-    createdAt: "2026-04-10T12:05:00",
+    shift: "Ca 3 (20:30 - 22:00, 20/04/2026)",
+    totalPrice: 1_800_000,
+    depositAmount: 900_000,
+    status: "Đã cọc",
+    matchDate: "2026-04-20T20:30:00",
   },
   {
     id: "ord-005",
     facilityId: "dai-tu",
     fieldId: "f-008",
     customerName: "Minh Vũ",
-    totalAmount: 1_800_000,
-    depositAmount: 600_000,
-    createdAt: "2026-04-10T13:40:00",
+    shift: "Ca 2 (18:00 - 19:30, 17/04/2026)",
+    totalPrice: 1_800_000,
+    depositAmount: 900_000,
+    status: "Đã hủy",
+    matchDate: "2026-04-17T18:00:00",
   },
   {
     id: "ord-006",
     facilityId: "dai-tu",
     fieldId: "f-009",
     customerName: "Phúc Trần",
-    totalAmount: 900_000,
-    depositAmount: 300_000,
-    createdAt: "2026-04-10T15:20:00",
+    shift: "Ca 1 (15:30 - 17:00, 21/04/2026)",
+    totalPrice: 900_000,
+    depositAmount: 450_000,
+    status: "Chờ cọc",
+    matchDate: "2026-04-21T15:30:00",
   },
 ];
