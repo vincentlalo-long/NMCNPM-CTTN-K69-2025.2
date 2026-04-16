@@ -84,7 +84,7 @@ interface AuthContextValue {
 
 **Cách sử dụng:**
 ```typescript
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthProvider';
 
 // Bọc app với provider
 function App() {
@@ -195,7 +195,7 @@ const response = await fetch('/api/user/profile', {
 Cập nhật file `main.tsx` hoặc file mount app:
 
 ```typescript
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthProvider';
 
 ReactDOM.render(
   <AuthProvider>
@@ -241,10 +241,10 @@ localStorage.setItem("accessToken", token);
 
 ### 2. Sử dụng Auth Context để check authentication
 ```typescript
-// ✅ Tốt
+// Tốt
 const { isAuthenticated, user } = useAuthContext();
 
-// ❌ Tránh
+//  Tránh
 const token = localStorage.getItem("accessToken");
 ```
 
@@ -260,10 +260,10 @@ try {
 
 ### 4. Sử dụng centralized API service
 ```typescript
-// ✅ Tốt
+// Tốt
 import { loginUser } from '@/services/authApi';
 
-// ❌ Tránh
+// Tránh
 fetch('http://localhost:8080/auth/login', ...)
 ```
 

@@ -1,6 +1,5 @@
 /**
  * Token Storage Utility
- * Quản lý lưu trữ, lấy, và xóa token từ localStorage
  */
 
 const TOKEN_KEY = "accessToken";

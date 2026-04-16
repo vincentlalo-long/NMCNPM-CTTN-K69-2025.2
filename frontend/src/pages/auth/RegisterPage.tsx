@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { AuthLayout } from "../../layouts/AuthLayout";
 import { RegisterForm } from "./RegisterForm";
@@ -12,8 +12,6 @@ interface RegisterSubmitPayload {
 }
 
 export function RegisterPage() {
-  const navigate = useNavigate();
-
   // Hàm xử lý gọi API khi user ấn nút đăng ký
   const handleRegister = async (payload: RegisterSubmitPayload) => {
     console.log("Gọi API đăng ký");
