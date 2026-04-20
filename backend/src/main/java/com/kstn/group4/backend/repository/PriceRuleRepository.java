@@ -7,3 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PriceRuleRepository extends JpaRepository<PriceRule, Integer> {
     List<PriceRule> findByPitchId(Integer pitchId);
 }
+

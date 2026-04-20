@@ -18,17 +18,30 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @EntityGraph(attributePaths = {"pitch"})
     List<Booking> findByPlayerIdOrderByCreatedAtDesc(Integer playerId);
 
-    @Query("""
-            SELECT b FROM Booking b
-            JOIN FETCH b.pitch p
-            WHERE p.manager.id = :managerId
-            ORDER BY b.createdAt DESC
-            """)
-    List<Booking> findAllByManagerId(@Param("managerId") Integer managerId);
+    @EntityGraph(attributePaths = {"pitch"})
+    List<Booking> findByPitchManagerIdOrderByCreatedAtDesc(Integer managerId);
+
+    @EntityGraph(attributePaths = {"pitch"})
+    List<Booking> findByPitchManagerIdAndStatusIgnoreCase(Integer managerId, String status);
 
     @EntityGraph(attributePaths = {"pitch", "pitch.manager"})
     @Query("SELECT b FROM Booking b WHERE b.id = :bookingId")
     Optional<Booking> findByIdWithPitchAndManager(@Param("bookingId") Integer bookingId);
+
+    @EntityGraph(attributePaths = {"pitch"})
+    @Query("SELECT b FROM Booking b WHERE b.id = :bookingId AND b.player.id = :playerId")
+    Optional<Booking> findByIdAndPlayerId(@Param("bookingId") Integer bookingId,
+                                          @Param("playerId") Integer playerId);
+
+    @Query("""
+            SELECT CASE WHEN COUNT(b) > 0 THEN true ELSE false END
+            FROM Booking b
+            WHERE b.player.id = :playerId
+              AND b.pitch.id = :pitchId
+              AND UPPER(b.status) = 'COMPLETED'
+            """)
+    boolean existsCompletedBookingByPlayerAndPitch(@Param("playerId") Integer playerId,
+                                                   @Param("pitchId") Integer pitchId);
 
     @Query("""
             SELECT b FROM Booking b
@@ -63,3 +76,4 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                                                          LocalDate bookingDate,
                                                          Collection<String> statuses);
 }
+

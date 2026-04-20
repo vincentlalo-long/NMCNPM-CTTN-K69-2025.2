@@ -1,9 +1,9 @@
 package com.kstn.group4.backend.controller.manager;
 
-import com.kstn.group4.backend.dto.booking.BookingResponse;
-import com.kstn.group4.backend.dto.booking.UpdateBookingStatusRequest;
-import com.kstn.group4.backend.service.AuthenticatedUserService;
-import com.kstn.group4.backend.service.BookingService;
+import com.kstn.group4.backend.dto.common.BookingResponse;
+import com.kstn.group4.backend.dto.manager.UpdateBookingStatusRequest;
+import com.kstn.group4.backend.service.common.AuthenticatedUserService;
+import com.kstn.group4.backend.service.common.BookingService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -41,3 +41,4 @@ public class ManagerBookingController {
         return ResponseEntity.ok(bookingService.updateBookingStatus(managerId, bookingId, request.status()));
     }
 }
+

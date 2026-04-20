@@ -1,9 +1,9 @@
 package com.kstn.group4.backend.controller.publicapi;
 
-import com.kstn.group4.backend.dto.pitch.AvailabilityResponse;
-import com.kstn.group4.backend.dto.pitch.PitchDetailResponse;
-import com.kstn.group4.backend.dto.pitch.PitchSummaryResponse;
-import com.kstn.group4.backend.service.PublicPitchService;
+import com.kstn.group4.backend.dto.publicapi.AvailabilityResponse;
+import com.kstn.group4.backend.dto.publicapi.PitchDetailResponse;
+import com.kstn.group4.backend.dto.common.PitchSummaryResponse;
+import com.kstn.group4.backend.service.publicapi.PublicPitchService;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
@@ -45,3 +45,4 @@ public class PublicPitchController {
         return ResponseEntity.ok(publicPitchService.getAvailability(pitchId, date));
     }
 }
+

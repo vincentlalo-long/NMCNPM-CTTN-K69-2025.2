@@ -40,3 +40,4 @@ public class PriceRule {
     @Column(name = "price")
     private BigDecimal price;
 }
+

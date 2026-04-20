@@ -1,10 +1,10 @@
 package com.kstn.group4.backend.controller;
 
-import com.kstn.group4.backend.payload.AuthResponse;
-import com.kstn.group4.backend.payload.JwtResponse;
-import com.kstn.group4.backend.payload.LoginRequest;
-import com.kstn.group4.backend.payload.RegisterRequest;
-import com.kstn.group4.backend.service.AuthService;
+import com.kstn.group4.backend.payload.auth.AuthResponse;
+import com.kstn.group4.backend.payload.auth.JwtResponse;
+import com.kstn.group4.backend.payload.auth.LoginRequest;
+import com.kstn.group4.backend.payload.auth.RegisterRequest;
+import com.kstn.group4.backend.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,3 +32,4 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 }
+

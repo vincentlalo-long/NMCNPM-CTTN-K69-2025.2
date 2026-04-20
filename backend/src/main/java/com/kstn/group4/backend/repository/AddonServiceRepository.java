@@ -7,3 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface AddonServiceRepository extends JpaRepository<AddonService, Integer> {
     List<AddonService> findByPitchId(Integer pitchId);
 }
+

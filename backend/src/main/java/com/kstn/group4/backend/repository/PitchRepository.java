@@ -34,3 +34,4 @@ public interface PitchRepository extends JpaRepository<Pitch, Integer> {
     @Query("SELECT p FROM Pitch p WHERE p.id = :id")
     Optional<Pitch> findByIdForUpdate(@Param("id") Integer id);
 }
+

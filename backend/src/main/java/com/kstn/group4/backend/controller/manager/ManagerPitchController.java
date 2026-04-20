@@ -1,14 +1,14 @@
 package com.kstn.group4.backend.controller.manager;
 
-import com.kstn.group4.backend.dto.pitch.AddonServiceResponse;
-import com.kstn.group4.backend.dto.pitch.ManagerAddPriceRuleRequest;
-import com.kstn.group4.backend.dto.pitch.ManagerAddServiceRequest;
-import com.kstn.group4.backend.dto.pitch.ManagerCreatePitchRequest;
-import com.kstn.group4.backend.dto.pitch.ManagerUpdatePitchRequest;
-import com.kstn.group4.backend.dto.pitch.PitchSummaryResponse;
-import com.kstn.group4.backend.dto.pitch.PriceRuleResponse;
-import com.kstn.group4.backend.service.AuthenticatedUserService;
-import com.kstn.group4.backend.service.ManagerPitchService;
+import com.kstn.group4.backend.dto.common.AddonServiceResponse;
+import com.kstn.group4.backend.dto.manager.ManagerAddPriceRuleRequest;
+import com.kstn.group4.backend.dto.manager.ManagerAddServiceRequest;
+import com.kstn.group4.backend.dto.manager.ManagerCreatePitchRequest;
+import com.kstn.group4.backend.dto.manager.ManagerUpdatePitchRequest;
+import com.kstn.group4.backend.dto.common.PitchSummaryResponse;
+import com.kstn.group4.backend.dto.common.PriceRuleResponse;
+import com.kstn.group4.backend.service.common.AuthenticatedUserService;
+import com.kstn.group4.backend.service.manager.ManagerPitchService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -78,3 +78,4 @@ public class ManagerPitchController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
+

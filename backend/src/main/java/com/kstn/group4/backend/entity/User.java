@@ -32,6 +32,12 @@ public class User {
     @Column(name = "team_id")
     private Integer teamId;
 
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     public User() {
         this.createdAt = LocalDateTime.now();
     }

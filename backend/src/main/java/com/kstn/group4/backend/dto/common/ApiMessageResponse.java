@@ -7,3 +7,4 @@ public record ApiMessageResponse(
         String message
 ) {
 }
+

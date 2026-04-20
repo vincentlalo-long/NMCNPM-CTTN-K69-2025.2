@@ -48,9 +48,13 @@ public class Pitch {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "status")
+    private String status;
+
     @OneToMany(mappedBy = "pitch")
     private List<PriceRule> priceRules = new ArrayList<>();
 
     @OneToMany(mappedBy = "pitch")
     private List<AddonService> services = new ArrayList<>();
 }
+
