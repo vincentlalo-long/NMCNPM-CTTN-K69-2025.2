@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Bell, CircleUserRound } from "lucide-react";
 import heroImg from "../assets/images/hero-lamine.webp";
 import logoAmixi from "../assets/images/logo-amixi.png";
-import { useState } from "react";
+
 
 const featureCards = [
   "Đặt sân trực tuyến",
@@ -10,89 +10,7 @@ const featureCards = [
   "Quản lý đơn đặt sân",
 ];
 
-function Notification({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
-  return (
-    <div className={`fixed top-6 right-6 z-50 px-6 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
-      <span>{message}</span>
-      <button className="ml-4 font-bold" onClick={onClose}>×</button>
-    </div>
-  );
-}
-
-function BookNowModal({ open, onClose, onConfirm, loading }: {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (field: string, slot: string) => void;
-  loading: boolean;
-}) {
-  const fields = ["Sân 1", "Sân 2", "Sân 3", "Sân 4"];
-  const slots = [
-    "8:00 - 9:30",
-    "9:30 - 11:00",
-    "15:00 - 16:30",
-    "16:30 - 18:00",
-    "18:00 - 19:30",
-  ];
-  const [field, setField] = useState(fields[0]);
-  const [slot, setSlot] = useState(slots[0]);
-  const price = 100000;
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-lg p-6 min-w-[320px] max-w-[90vw]">
-        <h3 className="text-lg font-bold mb-4">Đặt sân nhanh</h3>
-        <div className="mb-3">
-          <label className="block mb-1 font-semibold">Chọn sân</label>
-          <select className="w-full border rounded px-2 py-1" value={field} onChange={e => setField(e.target.value)}>
-            {fields.map(f => <option key={f} value={f}>{f}</option>)}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="block mb-1 font-semibold">Chọn khung giờ</label>
-          <select className="w-full border rounded px-2 py-1" value={slot} onChange={e => setSlot(e.target.value)}>
-            {slots.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <div className="mb-4 text-base font-semibold">Tổng tiền: <span className="text-[#2E9B3F]">{price.toLocaleString()}₫</span></div>
-        <div className="flex gap-3 justify-end">
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300">Hủy</button>
-          <button onClick={() => onConfirm(field, slot)} className="px-4 py-2 rounded bg-[#2E9B3F] text-white hover:bg-[#217a31]" disabled={loading}>
-            {loading ? "Đang đặt..." : "Xác nhận"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function LandingPage() {
-  const [showModal, setShowModal] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [bookingLoading, setBookingLoading] = useState(false);
-
-  const handleBookNow = async (field: string, slot: string) => {
-    setBookingLoading(true);
-    try {
-      // Replace with your actual booking API endpoint and payload
-      const res = await fetch("/api/fields/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: new Date().toLocaleDateString("en-GB"),
-          slots: [{ court: field, slot }],
-          totalPrice: 100000,
-        }),
-      });
-      if (!res.ok) throw new Error("Đặt sân thất bại. Vui lòng thử lại.");
-      setNotification({ message: "Đặt sân thành công!", type: "success" });
-      setShowModal(false);
-    } catch (err: any) {
-      setNotification({ message: err.message || "Có lỗi xảy ra!", type: "error" });
-    } finally {
-      setBookingLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#005E2E] to-[#29721D]">
       <header className="border-b border-white/15 bg-[#005E2E]/55 backdrop-blur">
@@ -174,28 +92,15 @@ export function LandingPage() {
               <br />
               ĐÁ!
             </h2>
-            {/* Nút \"Đặt sân ngay\" mở modal */}
-            <button
+            {/* Nút "Đặt sân ngay" → /booking */}
+            <Link
+              to="/booking"
               className="inline-flex rounded-md border-4 border-[#2D0B0B] bg-white px-16 py-6 text-3xl font-bold text-[#1E160C] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-105 hover:brightness-95 md:text-4xl"
-              onClick={() => setShowModal(true)}
             >
               Đặt sân ngay !
-            </button>
+            </Link>
           </div>
         </div>
-        <BookNowModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          onConfirm={handleBookNow}
-          loading={bookingLoading}
-        />
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
       </section>
 
       <main className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
