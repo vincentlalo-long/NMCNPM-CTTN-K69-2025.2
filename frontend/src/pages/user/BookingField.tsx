@@ -1,22 +1,33 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, ArrowLeft, X } from "lucide-react";
+import { getBookedSlots, bookSlots } from "../../api/user/userApi";
+
+// Generate time slots for a full day (06:00–23:00) with 90-minute intervals
+function generateTimeSlots(): string[] {
+  const slots: string[] = [];
+  let startHour = 6;
+  let startMinute = 0;
+  while (true) {
+    const end = new Date(0, 0, 0, startHour, startMinute + 90);
+    const endHour = end.getHours();
+    const endMinute = end.getMinutes();
+    slots.push(
+      `${startHour.toString().padStart(2, "0")}:${startMinute
+        .toString()
+        .padStart(2, "0")} - ${endHour.toString().padStart(2, "0")}:${endMinute
+        .toString()
+        .padStart(2, "0")}`
+    );
+    if (endHour > 22 || (endHour === 22 && endMinute > 0) || endHour >= 23) break;
+    startHour = endHour;
+    startMinute = endMinute;
+  }
+  return slots;
+}
 
 const defaultCourts = ["Sân 1", "Sân 2", "Sân 3", "Sân 4"];
-const defaultTimeSlots = [
-  "8:00 - 9:30",
-  "9:30 - 11:00",
-  "15:00 - 16:30",
-  "16:30 - 18:00",
-  "18:00 - 19:30",
-];
-
-// Mock booked slots — thay bằng API thật sau
-const mockBookedSlots: Record<string, boolean> = {
-  "Sân 1-8:00 - 9:30": true,
-  "Sân 2-15:00 - 16:30": true,
-  "Sân 3-18:00 - 19:30": true,
-};
+const defaultTimeSlots = generateTimeSlots();
 
 const PRICE_PER_SLOT = 100_000;
 
@@ -98,7 +109,6 @@ function ConfirmModal({ selectedItems, date, onConfirm, onCancel }: ConfirmModal
             <X size={16} />
           </button>
         </div>
-
         {/* Body */}
         <div className="px-5 py-4 space-y-4">
           {/* Date */}
@@ -106,7 +116,6 @@ function ConfirmModal({ selectedItems, date, onConfirm, onCancel }: ConfirmModal
             <Calendar size={15} className="text-[#2E9B3F]" />
             <span>Ngày đặt: <span className="font-semibold text-gray-800">{date}</span></span>
           </div>
-
           {/* Slots grouped by court */}
           <div className="space-y-2">
             {Object.entries(grouped).map(([court, slots]) => (
@@ -123,10 +132,8 @@ function ConfirmModal({ selectedItems, date, onConfirm, onCancel }: ConfirmModal
               </div>
             ))}
           </div>
-
           {/* Divider */}
           <div className="border-t border-dashed border-gray-200" />
-
           {/* Total */}
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-700">Tổng tiền</span>
@@ -134,13 +141,11 @@ function ConfirmModal({ selectedItems, date, onConfirm, onCancel }: ConfirmModal
               {total.toLocaleString("vi-VN")}đ
             </span>
           </div>
-
           {/* Note */}
           <p className="text-xs text-gray-400 text-center">
             Vui lòng thanh toán tại quầy khi đến sân
           </p>
         </div>
-
         {/* Actions */}
         <div className="flex gap-3 px-5 pb-5">
           <button
@@ -169,11 +174,28 @@ export function BookingField() {
     return now.toLocaleDateString("en-GB").split("/").join("/");
   });
   const [showModal, setShowModal] = useState(false);
+  const [bookedSlots, setBookedSlots] = useState<Record<string, boolean>>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
-  // Dùng mock data — khi có API thật thì thay bookedSlots bằng data fetch về
-  const bookedSlots = mockBookedSlots;
   const courts = defaultCourts;
   const timeSlots = defaultTimeSlots;
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    getBookedSlots(date)
+      .then((slots) => {
+        const booked: Record<string, boolean> = {};
+        slots.forEach(({ court, slot }) => {
+          booked[`${court}-${slot}`] = true;
+        });
+        setBookedSlots(booked);
+      })
+      .catch(() => setError("Không thể tải dữ liệu đặt sân"))
+      .finally(() => setLoading(false));
+  }, [date]);
 
   const getKey = (court: string, slot: string) => `${court}-${slot}`;
 
@@ -207,11 +229,34 @@ export function BookingField() {
       return { court: key.slice(0, idx), slot: key.slice(idx + 1) };
     });
 
-  const handleConfirm = () => {
-    // TODO: gọi API đặt sân ở đây
-    setShowModal(false);
-    setSelected({});
-    alert("Đặt sân thành công!");
+  const handleBooking = async (selectedItems: { court: string; slot: string }[], date: string) => {
+    const bookingData = { date, slots: selectedItems };
+    const res = await bookSlots(bookingData);
+    if (!res.success) {
+      throw new Error(res.message || "Đặt sân thất bại");
+    }
+  };
+
+  const handleConfirm = async () => {
+    try {
+      await handleBooking(selectedItems, date);
+      setShowModal(false);
+      setSelected({});
+      setLoading(true);
+      getBookedSlots(date)
+        .then((slots) => {
+          const booked: Record<string, boolean> = {};
+          slots.forEach(({ court, slot }) => {
+            booked[`${court}-${slot}`] = true;
+          });
+          setBookedSlots(booked);
+        })
+        .catch(() => setBookedSlots({}))
+        .finally(() => setLoading(false));
+      alert("Đặt sân thành công!");
+    } catch (e: any) {
+      alert(e.message || "Lỗi khi đặt sân!");
+    }
   };
 
   const dateInputValue = (() => {
@@ -219,6 +264,7 @@ export function BookingField() {
     return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   })();
 
+  // --- UI ---
   return (
     <>
       {showModal && (
@@ -242,19 +288,33 @@ export function BookingField() {
                 <ArrowLeft size={18} />
               </button>
               <h1 className="text-xl font-bold text-white">Đặt lịch trực quan</h1>
-              <label className="flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/20 cursor-pointer transition">
-                <input
-                  type="date"
-                  className="bg-transparent outline-none border-none text-white w-0 opacity-0 absolute"
-                  style={{ colorScheme: "dark" }}
-                  value={dateInputValue}
-                  onChange={handleDateChange}
-                />
-                <Calendar size={16} />
-                <span>{date}</span>
-              </label>
+              <div className="relative">
+                <button
+                  className="flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/20 cursor-pointer transition"
+                  onClick={() => setCalendarOpen((open) => !open)}
+                >
+                  <Calendar size={16} />
+                  <span>{date}</span>
+                </button>
+                {calendarOpen && (
+                  <div className="absolute right-0 mt-2 z-50 bg-white rounded-xl shadow-lg p-4">
+                    <input
+                      type="date"
+                      className="text-gray-800 border rounded px-2 py-1"
+                      value={dateInputValue}
+                      onChange={(e) => {
+                        handleDateChange(e);
+                        setCalendarOpen(false);
+                      }}
+                      min={(() => {
+                        const now = new Date();
+                        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+                      })()}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-
             {/* Legend */}
             <div className="mt-3 flex items-center gap-6 text-sm text-white">
               {[
@@ -270,7 +330,6 @@ export function BookingField() {
               ))}
             </div>
           </div>
-
           {/* Note */}
           <div className="bg-gray-200 px-5 py-2.5 text-sm">
             <span className="font-bold text-[#E8527A]">Lưu ý: </span>
@@ -278,9 +337,7 @@ export function BookingField() {
               phải đặt sân liên giờ nhau, không được đặt cách nhau
             </span>
           </div>
-
           <div className="h-2 bg-[#7DD3F8]" />
-
           {/* Grid */}
           <div className="px-6 py-4">
             <div className="grid grid-cols-4 mb-4">
@@ -311,7 +368,6 @@ export function BookingField() {
               ))}
             </div>
           </div>
-
           {/* Bottom bar — chỉ hiện khi có slot được chọn */}
           {selectedItems.length > 0 && (
             <div className="sticky bottom-0 border-t border-gray-100 bg-white px-6 py-4 flex items-center justify-between">
