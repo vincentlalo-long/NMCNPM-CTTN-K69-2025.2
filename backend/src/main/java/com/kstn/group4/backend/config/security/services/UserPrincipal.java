@@ -1,7 +1,7 @@
 package com.kstn.group4.backend.config.security.services;
 
-import com.kstn.group4.backend.entity.User;
-import com.kstn.group4.backend.entity.Role;
+import com.kstn.group4.backend.user.entity.User;
+import com.kstn.group4.backend.user.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

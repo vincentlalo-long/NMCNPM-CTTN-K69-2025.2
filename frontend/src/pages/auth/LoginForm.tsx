@@ -97,7 +97,7 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
 
   const handleAdminLogin = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    void submitWithRole("OWNER", "/admin");
+    void submitWithRole("ADMIN", "/admin");
   };
 
   const handleUserLogin = (event: MouseEvent<HTMLButtonElement>) => {

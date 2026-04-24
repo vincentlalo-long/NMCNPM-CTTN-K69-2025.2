@@ -1,0 +1,45 @@
+package com.kstn.group4.backend.venue.repository;
+
+import com.kstn.group4.backend.venue.entity.Pitch;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface PitchRepository extends JpaRepository<Pitch, Integer> {
+
+    List<Pitch> findByVenueId(Integer venueId);
+
+        Page<Pitch> findByVenueIdAndVenueManagerId(Integer venueId, Integer managerId, Pageable pageable);
+
+        Optional<Pitch> findByIdAndVenueManagerId(Integer id, Integer managerId);
+
+        long countByVenueId(Integer venueId);
+
+    List<Pitch> findByVenueIdAndIsActiveTrue(Integer venueId);
+
+    @Query("SELECT DISTINCT p FROM Pitch p " +
+            "LEFT JOIN FETCH p.priceRules " +
+            "WHERE p.venue.id = :venueId AND p.isActive = true " +
+            "ORDER BY p.id ASC")
+    List<Pitch> findActiveByVenueIdWithPriceRules(@Param("venueId") Integer venueId);
+
+    @Query("SELECT COUNT(p) FROM Pitch p WHERE p.isActive = true")
+    long countActivePitches();
+
+    // Lock sân khi đang thực hiện thanh toán/đặt sân để tránh Race Condition
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Pitch p WHERE p.id = :id")
+    Optional<Pitch> findByIdForUpdate(@Param("id") Integer id);
+
+    @Query("SELECT DISTINCT p FROM Pitch p " +
+            "LEFT JOIN FETCH p.venue " +
+            "LEFT JOIN FETCH p.priceRules " +
+            "WHERE p.id = :id")
+    Optional<Pitch> findByIdWithDetails(@Param("id") Integer id);
+}

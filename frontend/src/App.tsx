@@ -10,10 +10,10 @@ import { TeamsPage } from "./pages/admin/TeamsPage.tsx";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { LandingPage } from "./pages/LandingPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
-import { BookingPage } from "./pages/user/BookingPage";
-import { BookingField } from "./pages/user/BookingField";
-import { MatchPage } from "./pages/user/MatchPage";
-import { ProfilePage } from "./pages/user/ProfilePage.tsx";
+import { BookingPage } from "./pages/player/BookingPage.tsx";
+import { BookingField } from "./pages/player/BookingField.tsx";
+import { MatchPage } from "./pages/player/MatchPage.tsx";
+import { ProfilePage } from "./pages/player/ProfilePage.tsx";
 
 function App() {
   return (

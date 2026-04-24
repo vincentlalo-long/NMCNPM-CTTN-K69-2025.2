@@ -5,7 +5,7 @@ export async function getDashboardStats(
   facilityId: string | "ALL",
 ): Promise<DashboardStatsResponse> {
   const { data } = await axiosInstance.get<DashboardStatsResponse>(
-    "/managers/dashboard/stats",
+    "/admin/dashboard/stats",
     {
       params: {
         facilityId,
@@ -20,7 +20,7 @@ export async function getRecentOrders(
   facilityId: string | "ALL",
 ): Promise<RecentOrderDto[]> {
   const { data } = await axiosInstance.get<RecentOrderDto[]>(
-    "/managers/dashboard/recent-orders",
+    "/admin/dashboard/recent-orders",
     {
       params: {
         facilityId,
