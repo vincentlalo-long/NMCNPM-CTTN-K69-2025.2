@@ -2,20 +2,16 @@ spring:
   application:
     name: football-system
 
-  # 1. Java 25 Virtual Threads
   threads:
     virtual:
       enabled: true
 
-  # 2. Database Configuration
   datasource:
-    # Lưu ý: Nếu dùng Docker Compose Support, Spring có thể tự nhận diện,
     url: jdbc:mysql://localhost:3306/football_booking?useUnicode=true&characterEncoding=UTF-8&createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: ${DB_PASSWORD:mixisql123@}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-  # 3. JPA / Hibernate
   jpa:
     hibernate:
       ddl-auto: none
@@ -25,21 +21,18 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-  # 4. Docker Compose Support
   docker:
     compose:
       enabled: true
-      file: ./compose.yaml # Đảm bảo đường dẫn này trỏ đúng đến file compose.yaml
-      lifecycle-management: start_and_stop # Tự bật DB khi chạy App, tự tắt khi stop App
-      readiness:
-        tcp:
-          host: localhost
-          port: 3306
+      file: ./compose.yaml
+      lifecycle-management: start_and_stop
 
-  # 5. SQL Initialization (Tùy chọn)
   sql:
     init:
-      mode: always # Đổi thành 'always' nếu bạn có file schema.sql hoặc data.sql muốn chạy tự động
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:seed.sql
+      continue-on-error: false
 
 server:
   port: 8080
@@ -50,6 +43,7 @@ application:
   cors:
     allowed-origins:
       - ${FRONTEND_ORIGIN:http://localhost:5173}
+
   security:
     jwt:
       secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
@@ -60,5 +54,6 @@ application:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+    org.springframework.jdbc.datasource.init: DEBUG
     org.springframework.web: INFO
     com.kstn.group4.backend: DEBUG

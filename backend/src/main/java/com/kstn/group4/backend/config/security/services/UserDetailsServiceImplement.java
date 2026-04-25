@@ -1,7 +1,7 @@
 package com.kstn.group4.backend.config.security.services;
 
-import com.kstn.group4.backend.entity.User;
-import com.kstn.group4.backend.repository.UserRepository;
+import com.kstn.group4.backend.user.entity.User;
+import com.kstn.group4.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
