@@ -1,89 +1,139 @@
 package com.kstn.group4.backend.exception;
 
-import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
-@Slf4j
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Global exception handler for the application.
+ * Centralized handling of all custom exceptions with standardized response format.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handle ResourceNotFoundException - 404 Not Found
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
+    public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(
+            ResourceNotFoundException ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                ex.getResourceName(),
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiErrorResponse> handleBadRequest(BadRequestException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    /**
+     * Handle ResourceConflictException - 409 Conflict
+     */
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceConflictException(
+            ResourceConflictException ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                "CONFLICT",
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.CONFLICT, ex.getMessage(), request.getRequestURI());
+    /**
+     * Handle BusinessException - 400 Bad Request
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessException(
+            BusinessException ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                ex.getErrorCode(),
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiErrorResponse> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng", request.getRequestURI());
+    /**
+     * Handle ForbiddenException - 403 Forbidden
+     */
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenException(
+            ForbiddenException ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                "FORBIDDEN",
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    /**
+     * Handle generic RuntimeException - 500 Internal Server Error
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(
+            RuntimeException ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "An unexpected error occurred: " + ex.getMessage(),
+                "INTERNAL_ERROR",
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    @ExceptionHandler(ForbiddenOperationException.class)
-    public ResponseEntity<ApiErrorResponse> handleForbidden(ForbiddenOperationException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.FORBIDDEN, "Bạn không có quyền truy cập tài nguyên này", request.getRequestURI());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidation(MethodArgumentNotValidException ex,
-                                                             HttpServletRequest request) {
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(this::formatFieldError)
-                .collect(Collectors.joining("; "));
-
-        return buildError(HttpStatus.BAD_REQUEST, message, request.getRequestURI());
-    }
-
+    /**
+     * Handle generic Exception - 500 Internal Server Error
+     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleUnknown(Exception ex, HttpServletRequest request) {
-        log.error("Unhandled exception at {}", request.getRequestURI(), ex);
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Đã có lỗi hệ thống, vui lòng thử lại sau", request.getRequestURI());
+    public ResponseEntity<Map<String, Object>> handleException(
+            Exception ex,
+            WebRequest request
+    ) {
+        Map<String, Object> response = buildErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "An error occurred: " + ex.getMessage(),
+                "ERROR",
+                request.getDescription(false)
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    private String formatFieldError(FieldError error) {
-        return error.getField() + ": " + error.getDefaultMessage();
-    }
-
-    private ResponseEntity<ApiErrorResponse> buildError(HttpStatus status, String message, String path) {
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(status.value())
-                .error(status.getReasonPhrase())
-                .message(message)
-                .path(path)
-                .build();
-
-        return ResponseEntity.status(status).body(response);
+    /**
+     * Build standardized error response format
+     */
+    private Map<String, Object> buildErrorResponse(
+            int status,
+            String message,
+            String errorCode,
+            String path
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", status);
+        response.put("error", errorCode);
+        response.put("message", message);
+        response.put("path", path);
+        return response;
     }
 }
-
